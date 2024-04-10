@@ -1,0 +1,55 @@
+.gotop{
+    background: #f0f0f0;
+    border-radius:1rem;
+    padding:0.2rem 1rem;
+    left: 50%;
+    transform:translateX(-50%);
+    max-width: calc(100% - var(--ipt-pageMargin)*2);
+    position: fixed;
+    box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%), 0 5px 8px 0 rgb(0 0 0 / 14%), 0 1px 14px 0 rgb(0 0 0 / 12%);
+    font-size: .875rem;
+    font-weight: 400;
+    line-height: 1.25rem;
+    letter-spacing: .01786em;
+    cursor:pointer;
+    z-index:1000
+}
+
+.gotop__slidein{
+    top:3rem;
+    animation : slidein 1s ease
+}
+
+.gotop__slideout{
+    top:-10rem;
+    animation: slideout 1s ease
+}
+
+@keyframes slidein {
+    from {
+        transform: translate(-50%,-1000%);
+    }
+  
+    to {
+        transform: translate(-50%,0);
+    }
+}
+
+@keyframes slideout {
+    from {
+        top:3rem;
+        transform: translate(-50%,0);
+    }
+  
+    to {
+        transform: translate(-50%,-100%);
+    }
+}
+
+.gotop:hover{
+    opacity:0.8
+}
+
+.gotop__content{
+    color:black
+}

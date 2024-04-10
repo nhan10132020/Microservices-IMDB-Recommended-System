@@ -1,0 +1,13 @@
+*{
+  margin:0;
+  padding:0;
+}
+
+
+html,body,#root,.App{
+  min-height:100%;
+}
+
+html{
+  background-color: black;
+}
