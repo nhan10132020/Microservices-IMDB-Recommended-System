@@ -1,12 +1,18 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"flag"
 	"os"
 	"strings"
 	"sync"
+	"time"
 
+	"github.com/nhan10132020/imdb/server/internal/data"
 	"github.com/nhan10132020/imdb/server/internal/jsonlog"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var (
@@ -36,6 +42,7 @@ type application struct {
 	config config
 	logger *jsonlog.Logger
 	wg     sync.WaitGroup
+	models data.Models
 }
 
 func main() {
@@ -68,13 +75,54 @@ func main() {
 
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
-	app := &application{
-		config: cfg,
-		logger: logger,
-	}
-
-	err := app.serve()
+	db, postgresDB, err := openDB(cfg)
 	if err != nil {
 		logger.PrintFatal(err, nil)
 	}
+	defer postgresDB.Close()
+	logger.PrintInfo("database connection pool established", nil)
+
+	app := &application{
+		config: cfg,
+		logger: logger,
+		models: data.NewModels(db),
+	}
+
+	err = app.serve()
+	if err != nil {
+		logger.PrintFatal(err, nil)
+	}
+}
+
+func openDB(cfg config) (*gorm.DB, *sql.DB, error) {
+	db, err := gorm.Open(postgres.Open(cfg.db.dsn), &gorm.Config{})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	postgresDB, err := db.DB()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	postgresDB.SetMaxOpenConns(cfg.db.maxOpenConns)
+	postgresDB.SetMaxIdleConns(cfg.db.maxIdleConns)
+
+	duration, err := time.ParseDuration(cfg.db.maxIdleTime)
+	if err != nil {
+		return nil, nil, err
+	}
+	postgresDB.SetConnMaxIdleTime(duration)
+
+	// create a context with a 5-second timeout deadline
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Use PingContext() to establish a new connection to the database, with 5-second timeout
+	err = postgresDB.PingContext(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return db, postgresDB, nil
 }

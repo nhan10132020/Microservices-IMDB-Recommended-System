@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -46,9 +47,12 @@ func (app *application) failedValidationResponse(w http.ResponseWriter, r *http.
 	app.errorResponse(w, r, http.StatusUnprocessableEntity, errors)
 }
 
+func (app *application) conflict(w http.ResponseWriter, r *http.Request, err error) {
+	app.errorResponse(w, r, http.StatusConflict, err.Error())
+}
+
 func (app *application) editConflictResponse(w http.ResponseWriter, r *http.Request) {
-	mess := "unable to update the record due to an edit conflict, please try again"
-	app.errorResponse(w, r, http.StatusConflict, mess)
+	app.conflict(w, r, errors.New("unable to update the record due to an edit conflict, please try again"))
 }
 
 func (app *application) rateLimitExceededResponse(w http.ResponseWriter, r *http.Request) {

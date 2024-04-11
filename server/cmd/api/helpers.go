@@ -108,6 +108,20 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 	return nil
 }
 
+func (app *application) getCookie(r *http.Request, name string) (*http.Cookie, error) {
+	cookie, err := r.Cookie(name)
+	if err != nil {
+		switch {
+		case errors.Is(err, http.ErrNoCookie):
+			return nil, http.ErrNoCookie
+		default:
+			return nil, err
+		}
+	}
+
+	return cookie, nil
+}
+
 func (app *application) readString(qs url.Values, key string, defaultValue string) string {
 	s := qs.Get(key)
 
