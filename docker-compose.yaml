@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  imdb-postgres:
+    image: postgres:15-alpine 
+    container_name: imdb-postgres
+    environment:
+      - POSTGRES_USER=root 
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=imdb-db
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    expose:
+      - 5432
+  imdb-server-go:
+    build:
+      context: ./server
+      dockerfile: dockerfile
+    container_name: imdb-server-go
+    ports:
+      - 4000:4000
+    depends_on: 
+      - imdb-postgres
+    links:
+      - imdb-postgres
+    restart: always
+  imdb-migrate: 
+    image: migrate/migrate
+    entrypoint: "migrate -database postgresql://root:password@imdb-postgres:5432/imdb-db?sslmode=disable -path /tmp/migrations"
+    command: up
+    container_name: imdb-migrate
+    depends_on: 
+      - imdb-postgres
+    links:
+      - imdb-postgres
+    volumes:
+      - ./server/migrations:/tmp/migrations
+    restart: on-failure
+  imdb-ai-go:
+    build:
+      context: ./AI
+      dockerfile: dockerfile
+    container_name: imdb-ai-go
+    ports:
+      - 4001:4001
+    depends_on: 
+      - imdb-postgres
+    links:
+      - imdb-postgres
+    restart: always
+

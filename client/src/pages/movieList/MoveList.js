@@ -1,20 +1,20 @@
 import React,{useEffect} from 'react'
 import './movieList.css'
 import {useParams} from 'react-router-dom'
-import Card from '../../components/card/Card'
+import Card from '../../components/card/Card.js'
 import useSWRInfinite from 'swr/infinite'
 import { getMovieList } from '../../api/movieListApi'
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
-import { getMovieTrending } from '../../api/movieListApi'
+import { getMovieDiscover } from '../../api/movieListApi'
 import { RotatingLines } from 'react-loader-spinner'
-import GoTop from '../../components/GoTop/GoTop'
+import GoTop from '../../components/goTop/GoTop'
 function MovieList(){
     let {type}=useParams()
     let fetcher = getMovieList
     if(!type){
-        type="trending"
-        fetcher = getMovieTrending
+        type="discover"
+        fetcher = getMovieDiscover
     }
     function replaceUnderscore(str){
         return str.replace(/_/g, ' ').replace(/\b[a-z]/g, function(letter){
@@ -24,7 +24,7 @@ function MovieList(){
 
     const getKey = (pageIndex)=>{
         pageIndex+=1;
-        if(type=== "trending"&&pageIndex>1) return null
+        if(type=== "discover"&&pageIndex>1) return null
         if(pageIndex>=6){
             return null;
         }
@@ -36,10 +36,9 @@ function MovieList(){
         size,
         setSize
     } = useSWRInfinite(getKey,fetcher)
-
     const isLoadingMore =isLoading || (size > 1 && movieList && typeof movieList[size - 1] === "undefined");
     const isReachingEnd =(movieList && size >=5);
-
+    
     
     useEffect(()=>{
         const loadMore = ()=>{
@@ -59,7 +58,7 @@ function MovieList(){
     return (
             <>
             <div className='movie__list'>
-                <h2 className='list__title'>{isLoading?<Skeleton width={"180px"} baseColor="#202020" highlightColor="#444"/>:type==="trending"?"Trending":replaceUnderscore(type)}</h2>
+                <h2 className='list__title'>{isLoading?<Skeleton width={"180px"} baseColor="#202020" highlightColor="#444"/>:type==="discover"?"Discover":replaceUnderscore(type)}</h2>
                 <div className='list__cards'>
                     {
                         isLoading?
@@ -72,7 +71,7 @@ function MovieList(){
                         }))
                     }
                 </div>
-                {isLoadingMore&&(!isReachingEnd||(size>movieList?.length))&&type!=="trending"&&(
+                {isLoadingMore&&(!isReachingEnd||(size>movieList?.length))&&type!=="discover"&&(
                     <div className='loading__state'>
                         <RotatingLines
                             strokeColor="grey"

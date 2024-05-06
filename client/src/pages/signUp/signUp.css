@@ -52,3 +52,11 @@ a {
     text-decoration:none;
     color: #0066C0;
 }
+
+.signup__error{
+    --tw-text-opacity: 1;
+    color: rgb(231 76 76 / var(--tw-text-opacity));
+    font-size: 0.875rem/* 14px */;
+    line-height: 1.25rem/* 20px */;
+    margin-top: -0.25rem/* 4px */;
+}

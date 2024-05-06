@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 )
@@ -51,10 +50,6 @@ func (app *application) conflict(w http.ResponseWriter, r *http.Request, err err
 	app.errorResponse(w, r, http.StatusConflict, err.Error())
 }
 
-func (app *application) editConflictResponse(w http.ResponseWriter, r *http.Request) {
-	app.conflict(w, r, errors.New("unable to update the record due to an edit conflict, please try again"))
-}
-
 func (app *application) rateLimitExceededResponse(w http.ResponseWriter, r *http.Request) {
 	mess := "rate limit exceeded"
 	app.errorResponse(w, r, http.StatusTooManyRequests, mess)
@@ -74,14 +69,4 @@ func (app *application) invalidAuthenticationTokenResponse(w http.ResponseWriter
 func (app *application) authenticationRequiredResponse(w http.ResponseWriter, r *http.Request) {
 	message := "you must be authenticated to access this resource"
 	app.errorResponse(w, r, http.StatusUnauthorized, message)
-}
-
-func (app *application) inactiveAccountResponse(w http.ResponseWriter, r *http.Request) {
-	message := "your user account must be activated to access this resource"
-	app.errorResponse(w, r, http.StatusForbidden, message)
-}
-
-func (app *application) notPermittedResponse(w http.ResponseWriter, r *http.Request) {
-	messages := "your user account doesn't have the necessary permissions to access this resource"
-	app.errorResponse(w, r, http.StatusForbidden, messages)
 }

@@ -15,9 +15,14 @@ var (
 )
 
 type Favourite struct {
-	UserID    int64     `json:"user_id" gorm:"column:user_id"`
-	MovieID   int64     `json:"movie_id" gorm:"column:movie_id"`
-	CreatedAt time.Time `json:"created_at" gorm:"column:created_at"`
+	UserID      int64     `json:"user_id" gorm:"column:user_id"`
+	MovieID     int64     `json:"movie_id" gorm:"column:movie_id"`
+	Title       string    `json:"title" gorm:"column:title"`
+	VoteAverage float32   `json:"vote_average" gorm:"column:vote_average"`
+	Overview    string    `json:"overview" gorm:"column:overview"`
+	PosterPath  string    `json:"poster_path" gorm:"column:poster_path"`
+	ReleaseDate string    `json:"release_date" gorm:"column:release_date"`
+	CreatedAt   time.Time `json:"created_at" gorm:"column:created_at"`
 }
 
 func (Favourite) TableName() string { return "favourites" }
@@ -44,31 +49,56 @@ func (f FavouriteModel) InsertFavMovie(fav_movie *Favourite) error {
 	return nil
 }
 
-func (f FavouriteModel) GetAllUserFavMovie(UserID int64) ([]*Favourite, error) {
+func (f FavouriteModel) GetAllUserFavMovie(userId int64) ([]*Favourite, error) {
 	// context 3-second timeout deadline
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	favs := []*Favourite{}
 
-	if err := f.DB.Table("favourites").WithContext(ctx).Where("user_id = ?", UserID).Find(&favs).Error; err != nil {
+	if err := f.DB.Table("favourites").WithContext(ctx).Where("user_id = ?", userId).Find(&favs).Error; err != nil {
 		return nil, err
 	}
 
 	return favs, nil
 }
 
-func (f FavouriteModel) DeleteUserFavMovie(UserID int64, movie_id []int64) error {
+func (f FavouriteModel) GetFavouriteMovieById(userId int64, movieId int64) (*Favourite, error) {
 	// context 3-second timeout deadline
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	if err := f.DB.WithContext(ctx).
-		Where("user_id = ?", UserID).
-		Delete(&Favourite{}, "movie_id", movie_id).
-		Error; err != nil {
+	fav := Favourite{}
+
+	if err := f.DB.Table("favourites").WithContext(ctx).Where("user_id = ? AND movie_id = ?", userId, movieId).First(&fav).Error; err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &fav, nil
+}
+
+func (f FavouriteModel) DeleteUserFavMovie(userId int64, movieId int64) error {
+	// context 3-second timeout deadline
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result := f.DB.WithContext(ctx).
+		Where("user_id = ? AND movie_id = ?", userId, movieId).
+		Delete(&Favourite{})
+
+	if err := result.Error; err != nil {
 		return err
 	}
 
+	if result.RowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+
 	return nil
+
 }

@@ -52,6 +52,9 @@
 .movie__name {
     font-weight: 600;
     font-size: 3rem;
+    display: flex;
+    gap: 1rem;
+    align-items:center;
 }
 
 .movie__voteCount {
@@ -84,6 +87,29 @@
     position: relative;
     align-items: center;
 }
+
+.movie__fav{
+    color:white;
+}
+
+.movie__fav:hover {
+    cursor:pointer;
+}
+
+.movie__disfav{
+    color:red;
+}
+
+.movie__disfav:hover{
+    cursor: pointer;
+}
+
+.movie__tooltip {
+    display: inline-flex;
+    align-items: center;
+}
+
+
 
 @media(max-width:900px){
     .movie__intro{

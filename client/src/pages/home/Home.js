@@ -5,14 +5,15 @@ import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a lo
 import { Carousel } from 'react-responsive-carousel';
 import {Link} from 'react-router-dom'
 import useSwr from 'swr'
-import { getMovieTrending } from '../../api/movieListApi';
+import { getMovieDiscover } from '../../api/movieListApi';
 import Skeleton from 'react-loading-skeleton';
 
 function Home(){
     const {
         isLoading,
-        data:trendingMovie,
-    } = useSwr("trending",getMovieTrending)
+        data:discoverMovie,
+    } = useSwr("discover",getMovieDiscover)
+
     return (
         <>  
              <div className="poster">
@@ -31,7 +32,7 @@ function Home(){
                          highlightColor="#444"
                         />
                     ):(
-                        trendingMovie.map(movie=>{
+                        discoverMovie.map(movie=>{
                             return (
                                 <Link style={{textDecoration:"none",color:'white'}} to={`/movie/${movie.id}`} key={movie.id}>
                                     <div className='posterImage'>

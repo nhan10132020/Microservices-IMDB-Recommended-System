@@ -14,13 +14,19 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 
 	// user's router
-	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
+	router.HandlerFunc(http.MethodPost, "/v1/register", app.registerUserHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/authentication", app.loginUserHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/account", app.getAccount)
+	router.HandlerFunc(http.MethodPost, "/v1/logout", app.requireAuthenticatedUser(app.logOutHandler))
 
 	// favourite's router
 	router.HandlerFunc(http.MethodGet, "/v1/favourite", app.requireAuthenticatedUser(app.getAllFavouriteMovieHandler))
-	router.HandlerFunc(http.MethodPost, "/v1/favourite/create", app.requireAuthenticatedUser(app.insertFavouriteMovieHandler))
-	router.HandlerFunc(http.MethodDelete, "/v1/favourite", app.requireAuthenticatedUser(app.deleteFavouriteMovieHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/favourite/:id", app.requireAuthenticatedUser(app.getFavouriteMovieByIdHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/favourite", app.requireAuthenticatedUser(app.insertFavouriteMovieHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/favourite/:id", app.requireAuthenticatedUser(app.deleteFavouriteMovieByIdHandler))
+
+	// recommend's router
+	router.HandlerFunc(http.MethodGet, "/v1/recommend", app.requireAuthenticatedUser(app.recommendMovieHandler))
 
 	return app.recoverPanic(app.enableCORS(app.rateLimit(app.authenticate(router))))
 }

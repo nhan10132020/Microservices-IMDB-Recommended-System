@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios'
 
 const movieListApi = axios.create({
     baseURL:"https://api.themoviedb.org/3"
@@ -11,8 +11,8 @@ export const getMovieList = async([category,page])=>{
     return response.data.results
 }
 
-export const getMovieTrending =async()=>{
+export const getMovieDiscover =async()=>{
     await delay()
-    const response = await movieListApi.get(`/trending/all/day?api_key=4e44d9029b1270a757cddc766a1bcb63&language=en-US`)
+    const response = await movieListApi.get(`/discover/movie?api_key=4e44d9029b1270a757cddc766a1bcb63&language=en-US`)
     return response.data.results
 }

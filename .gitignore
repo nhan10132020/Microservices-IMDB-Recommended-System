@@ -1,0 +1,4 @@
+postgres-data
+.env
+AI/__pycache__
+AI/test.ipynb

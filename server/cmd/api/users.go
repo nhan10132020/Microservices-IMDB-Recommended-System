@@ -11,9 +11,10 @@ import (
 
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Name       string `json:"name"`
+		Email      string `json:"email"`
+		Password   string `json:"password"`
+		RePassword string `json:"re_password"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -36,7 +37,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 
 	v := validator.New()
 
-	if data.ValidateUser(v, user); !v.Valid() {
+	if data.ValidateUser(v, user, input.RePassword); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
@@ -114,8 +115,10 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 		Name:     "session",
 		Value:    token.Plaintext,
 		Expires:  token.Expiry,
+		Path:     "/",
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+		Secure:   false, // Secure = false allow to access from js,
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	http.SetCookie(w, &cookie)
@@ -126,4 +129,39 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 		app.serverErrorResponse(w, r, err)
 	}
 
+}
+
+func (app *application) logOutHandler(w http.ResponseWriter, r *http.Request) {
+	cookie := http.Cookie{
+		Name:     "session",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Now(),
+		HttpOnly: true,
+		Secure:   false, // Secure = false allow to access from js,
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	http.SetCookie(w, &cookie)
+
+	// trả về thông tin user cho client gồm với status 200 OK
+	err := app.writeJson(w, http.StatusOK, envelope{"message": "logout successfully"}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) getAccount(w http.ResponseWriter, r *http.Request) {
+	user := app.contextGetUser(r)
+
+	if user.IsAnonymous() {
+		app.authenticationRequiredResponse(w, r)
+		return
+	}
+
+	// trả về thông tin user cho client gồm với status 200 OK
+	err := app.writeJson(w, http.StatusOK, envelope{"user": user}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
