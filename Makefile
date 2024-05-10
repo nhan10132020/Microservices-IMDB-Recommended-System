@@ -6,26 +6,14 @@ server:
 client:
 	make -C client run/client
 
-.PHONY: docker-compose
+.PHONY: database-setup
+database-setup:
+	docker compose --env-file ./.env.build up -d imdb-postgres imdb-redis
+
+.PHONY: docker-compose-up
 docker-compose:
 	docker compose --env-file ./.env.build up -d
 
-.PHONY: postgres
-postgres:
-	docker exec -it imdb-postgres psql
-
-.PHONY: createdb
-createdb:
-	docker exec -it imdb-postgres createdb --username=root --owner=root imdb-db
-
-.PHONY: dropdb
-dropdb:
-	docker exec -it imdb-postgres dropdb imdb-db
-
-.PHONY: mygrateup
-mygrateup:
-	migrate -path=migrations -database="postgresql://root:password@localhost:5432/imdb-db?sslmode=disable" up
-
-.PHONY: mygratedown
-mygratedown:
-	migrate -path=migrations -database="postgresql://root:password@localhost:5432/imdb-db?sslmode=disable" down     
+.PHONY: docker-compose-down
+docker-compose-down:
+	docker compose --env-file ./.env.build down
