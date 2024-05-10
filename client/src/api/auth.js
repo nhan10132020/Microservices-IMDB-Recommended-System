@@ -1,7 +1,8 @@
 import axios from 'axios'
+import { serverPort } from '../constants/constants'
 
 const authApi = axios.create({
-    baseURL:"http://localhost:4000/v1/"
+    baseURL:`http://localhost:${serverPort}/v1/`
 })
 
 authApi.defaults.withCredentials = true

@@ -4,7 +4,11 @@ server:
 
 .PHONY: client
 client:
-	make -C client npm run start
+	make -C client run/client
+
+.PHONY: docker-compose
+docker-compose:
+	docker compose --env-file ./.env.build up -d
 
 .PHONY: postgres
 postgres:

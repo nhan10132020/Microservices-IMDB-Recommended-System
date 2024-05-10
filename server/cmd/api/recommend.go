@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -46,8 +47,8 @@ func (app *application) recommendMovieHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// Send an HTTP GET request
-	resp, err := http.Post("http://localhost:4001/v1/ai/recommend", "application/json", bytes.NewBuffer(jsonBody))
+	// Send an HTTP request
+	resp, err := http.Post(fmt.Sprintf("http://%s:%d/v1/ai/recommend", app.config.aiHost, app.config.aiPort), "application/json", bytes.NewBuffer(jsonBody))
 
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

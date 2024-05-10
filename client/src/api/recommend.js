@@ -1,7 +1,8 @@
 import axios from 'axios'
+import { serverPort } from '../constants/constants'
 
 const recommendApi = axios.create({
-    baseURL:"http://localhost:4000/v1/"
+    baseURL:`http://localhost:${serverPort}/v1/`
 })
 
 recommendApi.defaults.withCredentials = true

@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
-	"flag"
+	"fmt"
+	"log"
 	"os"
-	"strings"
+	"strconv"
 	"sync"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/nhan10132020/imdb/server/internal/data"
 	"github.com/nhan10132020/imdb/server/internal/jsonlog"
 	"gorm.io/driver/postgres"
@@ -20,9 +22,11 @@ var (
 )
 
 type config struct {
-	port int
-	env  string
-	db   struct {
+	port   int
+	aiPort int
+	aiHost string
+	env    string
+	db     struct {
 		dsn          string
 		maxOpenConns int
 		maxIdleConns int
@@ -46,32 +50,43 @@ type application struct {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	var cfg config
 
-	//port setting
-	flag.IntVar(&cfg.port, "port", 4000, "API server port")
+	// port setting
+	cfg.port, _ = strconv.Atoi(os.Getenv("SERVER_PORT"))
+
+	// ai service setting
+	cfg.aiPort, _ = strconv.Atoi(os.Getenv("AI_PORT"))
+	cfg.aiHost = os.Getenv("AI_HOST")
 
 	// environment setting
-	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
+	cfg.env = os.Getenv("SERVER_ENV")
 
 	// db setting
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgresql://root:password@imdb-postgres:5432/imdb-db?sslmode=disable", "PostgreSQL DSN")
-	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
-	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
-	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time")
+	dbUser := os.Getenv("POSTGRES_USER")
+	dbPassword := os.Getenv("POSTGRES_PASSWORD")
+	dbName := os.Getenv("POSTGRES_DB")
+	dbPort := os.Getenv("POSTGRES_PORT")
+	dbHost := os.Getenv("POSTGRES_HOST")
+
+	cfg.db.dsn = fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable", dbUser, dbPassword, dbHost, dbPort, dbName)
+	cfg.db.maxOpenConns, _ = strconv.Atoi(os.Getenv("SERVER_DB_MAX_OPEN_CONN"))
+	cfg.db.maxIdleConns, _ = strconv.Atoi(os.Getenv("SERVER_DB_MAX_IDLE_CONN"))
+	cfg.db.maxIdleTime = os.Getenv("SERVER_DB_MAX_IDLE_TIME")
 
 	// rate-limiter setting
-	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
-	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
-	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+	cfg.limiter.rps, _ = strconv.ParseFloat(os.Getenv("SERVER_LIMITER_RPS"), 64)
+	cfg.limiter.burst, _ = strconv.Atoi(os.Getenv("SERVER_LIMITER_BURST"))
+	cfg.limiter.enabled, _ = strconv.ParseBool(os.Getenv("SERVER_LIMITER_ENABLED"))
 
 	// cors setting
-	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(val string) error {
-		cfg.cors.trustedOrigins = strings.Fields(val)
-		return nil
-	})
-
-	flag.Parse()
+	clientPort := os.Getenv("CLIENT_PORT")
+	cfg.cors.trustedOrigins = append(cfg.cors.trustedOrigins, fmt.Sprintf("http://localhost:%s", clientPort))
 
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 

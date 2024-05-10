@@ -5,6 +5,17 @@ from ast import literal_eval
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import json
+import redis
+import os
+from dotenv import load_dotenv
+import uvicorn
+
+load_dotenv() 
+
+# application
+app = FastAPI()
+rd = redis.StrictRedis(host=os.getenv("REDIS_HOST"),port=os.getenv("REDIS_PORT"))
+expired_cache_time = int(os.getenv("AI_TTL_CACHING"))
 
 # Get data
 md = pd.read_csv('data/movie.csv').drop_duplicates(subset="id").reset_index(drop=True) # processing data
@@ -58,15 +69,27 @@ def get_recommendations(movie_ids):
     movie_indices = [i for i in recommendations]
     return df.iloc[movie_indices].head(30)
 
-app = FastAPI()
 
 class reqRecommend(BaseModel): 
     fav_movie_ids: list[int]
 
-    
+
 @app.post("/v1/ai/recommend")
 def read_root(req: reqRecommend):
-    response = get_recommendations(req.fav_movie_ids)
-    return {
-        "recommend_ids":json.loads(response.to_json(orient='records'))
-    }
+    favourite_ids = sorted(req.fav_movie_ids)
+    # cache aside 
+    cache = rd.get(json.dumps(favourite_ids))
+    if cache: 
+        return {
+            "recommend_ids":json.loads(cache)
+        }
+    else:
+        response = get_recommendations(favourite_ids).to_json(orient='records')
+        rd.set(json.dumps(favourite_ids),response,ex=expired_cache_time)
+        return {
+            "recommend_ids":json.loads(response)
+        }
+        
+    
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("AI_PORT")))

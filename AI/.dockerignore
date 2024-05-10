@@ -1,0 +1,5 @@
+__pycache__
+data/scraping_movie.ipynb
+data/scraping_genres.ipynb
+test.ipynb
+Makefile

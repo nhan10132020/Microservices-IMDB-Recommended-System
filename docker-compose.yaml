@@ -3,23 +3,49 @@ services:
   imdb-postgres:
     image: postgres:15-alpine 
     container_name: imdb-postgres
+    restart: always
     environment:
-      - POSTGRES_USER=root 
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=imdb-db
+      - POSTGRES_USER=${POSTGRES_USER} 
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     ports:
-      - 5432:5432
-    expose:
-      - 5432
+      - ${POSTGRES_PORT}:5432
+  imdb-redis:
+    image: redis:7.2.4-alpine
+    container_name: imdb-redis
+    restart: always
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DATABASES=${REDIS_DATABASES}
+    ports:
+      - ${REDIS_PORT}:6379
   imdb-server-go:
     build:
       context: ./server
       dockerfile: dockerfile
+    environment:
+      - SERVER_PORT=${SERVER_PORT}
+      - SERVER_ENV=${SERVER_ENV}
+      - SERVER_HOST=${SERVER_HOST}
+      - SERVER_DB_MAX_OPEN_CONN=${SERVER_DB_MAX_OPEN_CONN}
+      - SERVER_DB_MAX_IDLE_CONN=${SERVER_DB_MAX_IDLE_CONN}
+      - SERVER_DB_MAX_IDLE_TIME=${SERVER_DB_MAX_IDLE_TIME}
+      - SERVER_LIMITER_RPS=${SERVER_LIMITER_RPS}
+      - SERVER_LIMITER_BURST=${SERVER_LIMITER_BURST}
+      - SERVER_LIMITER_ENABLED=${SERVER_LIMITER_ENABLED}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - AI_PORT=${AI_PORT}
+      - AI_HOST=${AI_HOST}
+      - CLIENT_PORT=${PORT}
     container_name: imdb-server-go
     ports:
-      - 4000:4000
+      - ${SERVER_PORT}:${SERVER_PORT}
     depends_on: 
       - imdb-postgres
     links:
@@ -37,16 +63,35 @@ services:
     volumes:
       - ./server/migrations:/tmp/migrations
     restart: on-failure
-  imdb-ai-go:
+  imdb-ai-py:
     build:
       context: ./AI
       dockerfile: dockerfile
-    container_name: imdb-ai-go
+    container_name: imdb-ai-py
     ports:
-      - 4001:4001
+      - ${AI_PORT}:${AI_PORT}
+    environment:
+      - AI_TTL_CACHING=${AI_TTL_CACHING}
+      - AI_HOST=${AI_HOST}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - AI_PORT=${AI_PORT}
     depends_on: 
-      - imdb-postgres
+      - imdb-redis
     links:
-      - imdb-postgres
+      - imdb-redis
     restart: always
+  imdb-client:
+    build:
+      context: ./client
+      dockerfile: dockerfile
+    container_name: imdb-client
+    depends_on: 
+      - imdb-server-go
+      - imdb-ai-py
+    environment:
+      - REACT_APP_SERVER_PORT=${REACT_APP_SERVER_PORT}
+    ports:
+      - ${PORT}:80
+    restart: unless-stopped
 
