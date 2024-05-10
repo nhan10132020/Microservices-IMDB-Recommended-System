@@ -52,7 +52,11 @@ type application struct {
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal(err.Error())
+		if os.Getenv("SERVER_ENV") != "" {
+			log.Println("server is running in docker container")
+		} else {
+			log.Fatal(err.Error())
+		}
 	}
 
 	var cfg config
