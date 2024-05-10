@@ -53,7 +53,7 @@ services:
     restart: always
   imdb-migrate: 
     image: migrate/migrate
-    entrypoint: "migrate -database postgresql://root:password@imdb-postgres:5432/imdb-db?sslmode=disable -path /tmp/migrations"
+    entrypoint: migrate -database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable -path /tmp/migrations
     command: up
     container_name: imdb-migrate
     depends_on: 
