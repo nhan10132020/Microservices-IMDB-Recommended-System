@@ -1,8 +1,8 @@
 import axios from 'axios'
-import { serverPort } from '../constants/constants'
+import { serverHost, serverPort } from '../constants/constants'
 
 const favouriteApi = axios.create({
-    baseURL:`http://localhost:${serverPort}/v1/`
+    baseURL:`http://${serverHost}:${serverPort}/v1/`
 })
 
 favouriteApi.defaults.withCredentials = true
