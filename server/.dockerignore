@@ -1,4 +1,4 @@
 migrations
 Makefile
 .env
-.example
+.env.example

@@ -24,4 +24,4 @@ Makefile
 .gitignore
 
 .env
-.example
+.env.example

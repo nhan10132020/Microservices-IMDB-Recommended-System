@@ -4,4 +4,4 @@ data/scraping_genres.ipynb
 test.ipynb
 Makefile
 .env
-.example
+.env.example
