@@ -92,4 +92,4 @@ def read_root(req: reqRecommend):
         
     
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("AI_PORT")))
+    uvicorn.run(app, host=os.getenv("AI_HOST"), port=int(os.getenv("AI_PORT")))

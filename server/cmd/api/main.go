@@ -23,6 +23,7 @@ var (
 
 type config struct {
 	port   int
+	host   string
 	aiPort int
 	aiHost string
 	env    string
@@ -63,6 +64,7 @@ func main() {
 
 	// port setting
 	cfg.port, _ = strconv.Atoi(os.Getenv("SERVER_PORT"))
+	cfg.host = os.Getenv("SERVER_HOST")
 
 	// ai service setting
 	cfg.aiPort, _ = strconv.Atoi(os.Getenv("AI_PORT"))
