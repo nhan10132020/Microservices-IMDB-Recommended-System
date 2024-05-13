@@ -4,7 +4,7 @@
 <p align="center">🎬 An ultimate movie companion app gives you access to a vast collection of top-rated, trending, and popular movies from IMDb. With an advanced machine learning algorithms, the app personalize your movie recommendations based on your favorite movies</p><br/>
 <br/>
 
-<img src="./.github/img/sample.png" align="right" width="320" alt="preview"/>
+![Imdb snapshot](./.github/img/sample.png)
 
 # Feature
 
