@@ -86,7 +86,7 @@ The app will be up and running at http://localhost:3000.
 
 ## Web scraping newest movies data
 
-`cd AI` 
+`cd ./AI/data` 
 
 - clear all data in genres.csv and movie.csv
-- run `scraping_genres.ipynb` and `scraping_movie.ipynb`
+- run `scraping_genres.ipynb` file and `scraping_movie.ipynb` file 
