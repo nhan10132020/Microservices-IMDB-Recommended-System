@@ -29,6 +29,7 @@ prerequisites: Docker and docker compose
 
 ```
 git clone https://github.com/nhan10132020/Microservices-IMDB-Recommended-System.git
+cd Microservices-IMDB-Recommended-System
 ```
 
 ## Installation
@@ -68,9 +69,11 @@ For databases config, modify their docker environment in .env.build file
 Running up server, AI and client:
 
 ```bash
-make server
+make backend
 ```
 
 ```bash
 make client
 ```
+
+The app will be up and running at http://localhost:3000. 

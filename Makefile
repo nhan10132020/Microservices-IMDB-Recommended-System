@@ -1,7 +1,7 @@
 include .env.build
 
-.PHONY: server
-server:
+.PHONY: backend
+backend:
 	make -C server run/api & make -C AI run/AI
 
 .PHONY: client
