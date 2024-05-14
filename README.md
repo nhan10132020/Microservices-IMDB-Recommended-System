@@ -77,3 +77,10 @@ make client
 ```
 
 The app will be up and running at http://localhost:3000. 
+
+## Web scraping newest movies data
+
+`cd AI` 
+
+- clear all data in genres.csv and movie.csv
+- run `scraping_genres.ipynb` and `scraping_movie.ipynb`
