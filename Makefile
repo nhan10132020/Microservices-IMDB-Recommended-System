@@ -10,7 +10,7 @@ client:
 
 .PHONY: database-setup
 database-setup:
-	docker compose --env-file ./.env.build up -d imdb-postgres imdb-redis
+	docker compose --env-file ./.env.build up -d imdb-postgres imdb-redis imdb-migrate
 
 .PHONY: environment
 environment:
