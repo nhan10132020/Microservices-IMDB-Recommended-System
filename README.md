@@ -66,12 +66,6 @@ Modify the configuration of the .env file in AI, server, and client to accommoda
 
 For databases config, modify their docker environment in .env.build file
 
-Migrations data for database with:
-
-```bash
-make mygrateup
-```
-
 Running up server, AI and client:
 
 ```bash
